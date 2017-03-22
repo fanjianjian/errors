@@ -283,7 +283,6 @@ func SecondCauseMsg(err error) string {
 		}
 		second, err = err, cause.Cause()
 	}
-	// return second
 
 	type msger interface {
 		Msg() string
