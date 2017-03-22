@@ -227,6 +227,7 @@ type withMessage struct {
 
 func (w *withMessage) Error() string { return w.msg + ": " + w.cause.Error() }
 func (w *withMessage) Cause() error  { return w.cause }
+func (w *withMessage) Msg() string   { return w.msg }
 
 func (w *withMessage) Format(s fmt.State, verb rune) {
 	switch verb {
@@ -266,4 +267,30 @@ func Cause(err error) error {
 		err = cause.Cause()
 	}
 	return err
+}
+
+// SecondCauseMsg get error second stack msg.
+func SecondCauseMsg(err error) string {
+	type causer interface {
+		Cause() error
+	}
+
+	second := err
+	for err != nil {
+		cause, ok := err.(causer)
+		if !ok {
+			break
+		}
+		second, err = err, cause.Cause()
+	}
+	// return second
+
+	type msger interface {
+		Msg() string
+	}
+	msg, ok := second.(msger)
+	if !ok {
+		return second.Error()
+	}
+	return msg.Msg()
 }
